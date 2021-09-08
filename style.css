@@ -1,3 +1,11 @@
-.hidden { 
-    display: none;
+.hidden {
+  display: none;
+}
+
+.best {
+  background-color: green;
+}
+
+.worst {
+  background-color: red;
 }
