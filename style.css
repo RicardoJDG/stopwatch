@@ -1,3 +1,41 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-family: "HelveticaNeue-UltraLight";
+  height: 100vh;
+}
+
+.centered__container {
+  border: green 2px solid;
+  display: flex;
+  width: 375px;
+  height: 812px;
+  flex-direction: column;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.upper__screen {
+  height: 50%;
+  border: 2px solid red;
+}
+
+.bottom__screen {
+  height: 50%;
+  border: 2px blue dashed;
+}
+
 .hidden {
   display: none;
 }

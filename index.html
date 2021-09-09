@@ -9,21 +9,23 @@
 </head>
 <body>
     <div class="container">
-        <div class="upperScreen">
-            <div class="timerScreen">
-                <p id="timer" className="timer">0</p>
+        <div class="centered__container">
+            <div class="upper__screen">
+                <div class="timerScreen">
+                    <p id="timer" className="timer">0</p>
+                </div>
+                <div class="buttons">
+                    <button id="resetBtn" class="hidden">Reset</button>
+                    <button id="lapBtn" class="whatever">Lap</button>
+                    <button id="startBtn">Start</button>
+                    <button id="stopBtn" class="hidden">Stop</button>
+                </div>
             </div>
-            <div class="buttons">
-                <button id="resetBtn" class="hidden">Reset</button>
-                <button id="lapBtn" class="whatever">Lap</button>
-                <button id="startBtn">Start</button>
-                <button id="stopBtn" class="hidden">Stop</button>
+            <div class="bottom__screen">
+                <ul id="timersList">
+    
+                </ul>
             </div>
-        </div>
-        <div class="bottomScreen">
-            <ul id="timersList">
-
-            </ul>
         </div>
     </div>
     <script src="index.js"></script>
