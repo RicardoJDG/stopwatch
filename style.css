@@ -4,15 +4,29 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: AppleFont;
+  src: url(fonts/SF-Pro-Display-Ultralight.otf);
+}
+
+:root {
+  --start-bg-color: #0b2a14;
+  --start-font-color: #39bd5a;
+  --lap-bg-color: #363337;
+  --lapoff-bg-color: #1f1c22;
+  --lapoff-font-color: #9c9ba0;
+  --stop-bg-color: #350e0e;
+  --stop-font-color: #d2504a;
+}
+
 body {
   background-color: black;
   color: white;
-  font-family: "HelveticaNeue-UltraLight";
+  font-family: "AppleFont";
   height: 100vh;
 }
 
 .centered__container {
-  border: green 2px solid;
   display: flex;
   width: 375px;
   height: 812px;
@@ -28,12 +42,59 @@ body {
 
 .upper__screen {
   height: 50%;
+  display: flex;
+  flex-direction: column;
   border: 2px solid red;
+}
+
+.timer__screen {
+  height: 75%;
+  border: 2px solid green;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer__screen p {
+  font-size: 72px;
+}
+
+.buttons {
+  display: flex;
+  height: 25%;
+  justify-content: space-between;
+}
+
+.roundBtn {
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  border: black 3px double;
+}
+
+.start {
+  background-color: var(--start-bg-color);
+  color: var(--start-font-color);
+}
+
+.lap {
+  background-color: var(--lap-bg-color);
+  color: var(--lap-font-color);
+}
+
+.lapoff {
+  background-color: var(--lapoff-bg-color);
+  color: var(--lapoff-font-color);
+}
+
+.stop {
+  background-color: var(--stop-bg-color);
+  color: var(--stop-font-color);
 }
 
 .bottom__screen {
   height: 50%;
-  border: 2px blue dashed;
+  border: 2px blue double;
 }
 
 .hidden {

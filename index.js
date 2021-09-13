@@ -5,39 +5,58 @@ const resetBtn = document.getElementById('resetBtn');
 const timer = document.getElementById('timer');
 const ul = document.getElementById('timersList');
 
-var handle = null;
-var hiddenStart = 0;
-var hiddenTimer = 0;
+let handle = null;
+let hiddenTimer = 0;
+let compensation = 0;
+let hiddentime = 0;
+let hiddenStart = 0;
 const lapTimers = [];
 const timeNodes = [];
 
 const increment = (startTime, timeCompensation = 0) => {
     const current = Date.now();
     const time = current - startTime;
-    timer.textContent = Math.floor((time) / 1000) + timeCompensation;
-    hiddenTimer = Math.floor((current - hiddenStart) / 1000)
+    const formattedTime = formatter(time + timeCompensation);
+    timer.textContent = formattedTime;
+    hiddenTimer = formattedTime;
+    hiddentime = time + timeCompensation;
+}
+
+const formatter = (difference) => {
+    const seconds = Math.floor(difference / 1000);
+    const minutes = Math.floor(difference / 60000);
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const hundredthSecond = difference > 60 ? (difference / 10) % 100 : difference / 10;
+    const flooredMilliseconds = Math.floor(hundredthSecond)
+    const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+
+    return `${formattedMinutes}:${formattedSeconds}.${flooredMilliseconds}`
 }
 
 function startTime (e) {
     e.preventDefault();
-    const currentTime = parseInt(timer.textContent);
+    const currentTime = timer.textContent;
     const start = Date.now();
-    if (currentTime !== 0) {
-        console.log(currentTime);
-        handle = setInterval(() => increment(start, currentTime), 10);
+    if (currentTime !== '00:00.00') {
+        handle = setInterval(() => increment(start, compensation), 10);
         startBtn.classList.add('hidden');
         stopBtn.classList.remove('hidden');
+        resetBtn.classList.add('hidden');
+        lapBtn.classList.remove('hidden')
     } else {
         hiddenStart = start;
         handle = setInterval(() => increment(start), 10);
         startBtn.classList.add('hidden');
         stopBtn.classList.remove('hidden');
+        lapBtn.classList.remove('lapoff');
+        lapBtn.classList.add('lap');
     }
 }
 
 function stopTime (e) {
     e.preventDefault();
     clearInterval(handle);
+    compensation = hiddentime;
     startBtn.classList.remove('hidden');
     stopBtn.classList.add('hidden');
     resetBtn.classList.remove('hidden');
@@ -46,9 +65,10 @@ function stopTime (e) {
 
 function resetTime (e) {
     e.preventDefault();
-    timer.textContent = 0;
+    timer.textContent = '00:00.00';
     resetBtn.classList.add('hidden');
-    lapBtn.classList.remove('hidden');
+    lapBtn.classList.remove('hidden', 'lap');
+    lapBtn.classList.add('lapoff')
     ul.innerHTML = "";
     lapTimers.length = 0;
     timeNodes.length = 0;
@@ -78,7 +98,6 @@ function lap (e) {
         timeNodes[maxIndex].classList.add('best');
         timeNodes[minIndex].classList.add('worst');
     }
-    console.log(timeNodes);
 }
 
 startBtn.addEventListener('click', startTime);
