@@ -11,16 +11,21 @@
 
 :root {
   --start-bg-color: #0b2a14;
-  --start-font-color: #39bd5a;
+  --start-font-color: #3ecb63;
+  --start-hold-color: #06160c;
   --lap-bg-color: #363337;
   --lapoff-bg-color: #1f1c22;
   --lapoff-font-color: #9c9ba0;
+  --lapoff-hold-bg-color: #0f0f0f;
   --stop-bg-color: #350e0e;
-  --stop-font-color: #d2504a;
+  --stop-font-color: #df3b33;
+  --stop-hold-bg-color: #1d0709;
+  --background: #020003;
+  --divisor-line: #211e21;
 }
 
 body {
-  background-color: black;
+  background-color: var(--background);
   color: white;
   font-family: "AppleFont";
   height: 100vh;
