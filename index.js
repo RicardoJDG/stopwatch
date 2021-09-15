@@ -5,15 +5,16 @@ const resetBtn = document.getElementById('resetBtn');
 const timer = document.getElementById('timer');
 const timersList = document.getElementById('timersList');
 
-let intervalId = null;
+let mainTimerInterval = null;
+let lapsInterval = null;
+
 let millisecondsOffset = 0;
 let millisecondsWhenStopped = 0;
 
 let newLapStart = 0;
 let lapTimer = 0;
-let lapTimerInMilliseconds = 0;
+let lapTimerWhenStopped = 0;
 let lapTimerMillisecondsOffset = 0;
-let lapMillisecondsWhenStopped = 0;
 
 
 const lapTimers = [];
@@ -32,7 +33,6 @@ const increment = (startTime, millisecondsOffset = 0) => {
 
     millisecondsWhenStopped = time + millisecondsOffset;
     lapMillisecondsWhenStopped = lapTimerInMilliseconds;
-    console.log(lapTimerMillisecondsOffset);
 }
 
 const formatTime = (timeInMilliseconds) => {
@@ -41,11 +41,7 @@ const formatTime = (timeInMilliseconds) => {
     const hundredthSecond = timeInMilliseconds > 60 ? (timeInMilliseconds / 10) % 100 : timeInMilliseconds / 10;
     const flooredHundredthSecond = Math.floor(hundredthSecond)
 
-    const formattedMinutes = minutes.toString().padStart(2, '0');
-    const formattedSeconds = seconds.toString().padStart(2, '0');
-    const formattedHundredthSecond = flooredHundredthSecond.toString().padStart(2, '0');
-
-    return `${formattedMinutes}:${formattedSeconds}.${formattedHundredthSecond}`
+    return `${padTime(minutes)}:${padTime(seconds)}.${padTime(flooredHundredthSecond)}`
 }
 
 const createLapRow = () => {
@@ -65,19 +61,38 @@ const createLapRow = () => {
     return lapRow;
 }
 
+const padTime = (time) => {
+    return `${time.toString().padStart(2, '0')}`
+}
+
+const beginTimer = (displayNode, startTime, millisecondsOffset = 0) => {
+    const current = Date.now();
+    const time = current - startTime;
+    const formattedTime = formatTime(time + millisecondsOffset)
+
+    displayNode.textContent = formattedTime;
+
+    return time + millisecondsOffset;
+}
+
 function startTime () {
     const currentTime = timer.textContent;
     const start = Date.now();
     if (currentTime !== '00:00.00') {
-        intervalId = setInterval(() => increment(start, millisecondsOffset), 10);
+        console.log(`Starting when different than 0: ${millisecondsOffset} and ${lapTimerMillisecondsOffset}`);
+        const currentLap = timeNodes[timeNodes.length - 1].children[1]
+        mainTimerInterval = setInterval(() => millisecondsWhenStopped = beginTimer(timer, start, millisecondsOffset), 1000 / 60);
+        lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, start, lapTimerMillisecondsOffset), 1000 / 60);
         startBtn.classList.add('hidden');
         stopBtn.classList.remove('hidden');
         resetBtn.classList.add('hidden');
         lapBtn.classList.remove('hidden')
     } else {
-        intervalId = setInterval(() => increment(start), 10);
         const lapRow = createLapRow();
         timeNodes.push(lapRow);
+        const currentLap = lapRow.children[1];
+        mainTimerInterval = setInterval(() => millisecondsWhenStopped = beginTimer(timer, start), 1000 / 60);
+        lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, start), 1000 / 60);
         startBtn.classList.add('hidden');
         stopBtn.classList.remove('hidden');
         lapBtn.classList.replace('lapoff', 'lap');
@@ -85,9 +100,12 @@ function startTime () {
 }
 
 function stopTime () {
-    clearInterval(intervalId);
+    const current = Date.now();
+    clearInterval(mainTimerInterval);
+    clearInterval(lapsInterval);
     millisecondsOffset = millisecondsWhenStopped;
-    lapTimerMillisecondsOffset = lapMillisecondsWhenStopped;
+    lapTimerMillisecondsOffset = lapTimerWhenStopped;
+    console.log(millisecondsWhenStopped);
     startBtn.classList.remove('hidden');
     stopBtn.classList.add('hidden');
     resetBtn.classList.remove('hidden');
@@ -106,13 +124,13 @@ function resetTime () {
 
 function recordLap () {
     const current = Date.now();
-    
-    lapTimers.push(lapTimerInMilliseconds);
-    lapTimerMillisecondsOffset = 0;
+    clearInterval(lapsInterval);
+    lapTimers.push(lapTimerWhenStopped);
     const lapRow = createLapRow();
     timeNodes.push(lapRow);
+    const currentLap = timeNodes[timeNodes.length - 1].children[1];
+    lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, current), 1000 / 60);
     
-    newLapStart = current;
     console.log(lapTimers);
 
     if (lapTimers.length >= 3) {
@@ -123,8 +141,8 @@ function recordLap () {
         const maxIndex = lapTimers.indexOf(max)
         const minIndex = lapTimers.indexOf(min)
 
-        timeNodes[maxIndex].classList.add('best');
-        timeNodes[minIndex].classList.add('worst');
+        timeNodes[maxIndex].classList.add('worst');
+        timeNodes[minIndex].classList.add('best');
     }
 }
 

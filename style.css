@@ -25,7 +25,6 @@
 }
 
 body {
-  background-color: var(--background);
   color: white;
   font-family: "AppleFont";
   height: 100vh;
@@ -36,6 +35,7 @@ body {
   width: 375px;
   height: 812px;
   flex-direction: column;
+  background-color: var(--background);
 }
 
 .container {
@@ -49,12 +49,10 @@ body {
   height: 50%;
   display: flex;
   flex-direction: column;
-  border: 2px solid red;
 }
 
 .timer__screen {
   height: 75%;
-  border: 2px solid green;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -62,19 +60,41 @@ body {
 
 .timer__screen p {
   font-size: 72px;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer__list {
+  width: 95%;
+  margin: auto;
+  border-collapse: collapse;
+}
+
+tr {
+  border-top: 1px solid var(--divisor-line);
+}
+
+tr td {
+  width: 50%;
+  padding: 0.5em;
+}
+
+tr td:last-of-type {
+  text-align: right;
 }
 
 .buttons {
   display: flex;
   height: 25%;
   justify-content: space-between;
+  padding: 0.5em;
 }
 
 .roundBtn {
   border-radius: 50%;
   width: 80px;
   height: 80px;
-  border: black 3px double;
+  border: black 5px double;
+  cursor: pointer;
 }
 
 .start {
@@ -82,9 +102,17 @@ body {
   color: var(--start-font-color);
 }
 
+.start:active {
+  background-color: var(--start-hold-color);
+}
+
 .lap {
   background-color: var(--lap-bg-color);
   color: var(--lap-font-color);
+}
+
+.lap:active {
+  background-color: var(--lapoff-hold-bg-color);
 }
 
 .lapoff {
@@ -97,9 +125,12 @@ body {
   color: var(--stop-font-color);
 }
 
+.stop:active {
+  background-color: var(--stop-hold-bg-color);
+}
+
 .bottom__screen {
   height: 50%;
-  border: 2px blue double;
 }
 
 .hidden {
@@ -107,9 +138,9 @@ body {
 }
 
 .best {
-  background-color: green;
+  color: green;
 }
 
 .worst {
-  background-color: red;
+  color: red;
 }
