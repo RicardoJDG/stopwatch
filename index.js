@@ -4,6 +4,7 @@ const startBtn = document.getElementById('startBtn');
 const resetBtn = document.getElementById('resetBtn');
 const timer = document.getElementById('timer');
 const timersList = document.getElementById('timersList');
+const startingHtml = timersList.innerHTML;
 
 let mainTimerInterval = null;
 let lapsInterval = null;
@@ -20,28 +21,15 @@ let lapTimerMillisecondsOffset = 0;
 const lapTimers = [];
 const timeNodes = [];
 
-const increment = (startTime, millisecondsOffset = 0) => {
-    const current = Date.now();
-    const time = current - startTime;
-    const formattedTime = formatTime(time + millisecondsOffset);
-
-    timer.textContent = formattedTime;
-
-    lapTimer = timeNodes.length <= 1 ? formattedTime : millisecondsOffset !== 0 ? formatTime(time + lapTimerMillisecondsOffset) : formatTime(current - newLapStart);
-    lapTimerInMilliseconds = timeNodes.length <= 1 ? time + millisecondsOffset : millisecondsOffset !== 0 ? (time + lapTimerMillisecondsOffset) : (current - newLapStart);
-    timeNodes[timeNodes.length - 1].children[1].textContent = lapTimer;
-
-    millisecondsWhenStopped = time + millisecondsOffset;
-    lapMillisecondsWhenStopped = lapTimerInMilliseconds;
-}
-
 const formatTime = (timeInMilliseconds) => {
     const seconds = Math.floor(timeInMilliseconds / 1000);
+    const formattedSeconds = seconds < 60 ? seconds : seconds % 60;
     const minutes = Math.floor(timeInMilliseconds / 60000);
+    const formattedMinutes = minutes < 60 ? minutes: minutes % 60;
     const hundredthSecond = timeInMilliseconds > 60 ? (timeInMilliseconds / 10) % 100 : timeInMilliseconds / 10;
     const flooredHundredthSecond = Math.floor(hundredthSecond)
 
-    return `${padTime(minutes)}:${padTime(seconds)}.${padTime(flooredHundredthSecond)}`
+    return `${padTime(formattedMinutes)}:${padTime(formattedSeconds)}.${padTime(flooredHundredthSecond)}`
 }
 
 const createLapRow = () => {
@@ -56,7 +44,7 @@ const createLapRow = () => {
 
 
     lapRow.append(lapNumber, lapTime)
-    timersList.appendChild(lapRow);
+    timersList.children[0].appendChild(lapRow);
 
     return lapRow;
 }
@@ -70,7 +58,13 @@ const beginTimer = (displayNode, startTime, millisecondsOffset = 0) => {
     const time = current - startTime;
     const formattedTime = formatTime(time + millisecondsOffset)
 
-    displayNode.textContent = formattedTime;
+    if (displayNode.id === 'timer') {
+        displayNode.textContent = formattedTime;
+    } else {
+        displayNode.children[0].textContent = `Lap ${lapTimers.length + 1}`
+        displayNode.children[1].textContent = formattedTime;
+    }
+
 
     return time + millisecondsOffset;
 }
@@ -79,8 +73,7 @@ function startTime () {
     const currentTime = timer.textContent;
     const start = Date.now();
     if (currentTime !== '00:00.00') {
-        console.log(`Starting when different than 0: ${millisecondsOffset} and ${lapTimerMillisecondsOffset}`);
-        const currentLap = timeNodes[timeNodes.length - 1].children[1]
+        const currentLap = timersList.children[0].children[lapTimers.length];
         mainTimerInterval = setInterval(() => millisecondsWhenStopped = beginTimer(timer, start, millisecondsOffset), 1000 / 60);
         lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, start, lapTimerMillisecondsOffset), 1000 / 60);
         startBtn.classList.add('hidden');
@@ -88,9 +81,7 @@ function startTime () {
         resetBtn.classList.add('hidden');
         lapBtn.classList.remove('hidden')
     } else {
-        const lapRow = createLapRow();
-        timeNodes.push(lapRow);
-        const currentLap = lapRow.children[1];
+        const currentLap = timersList.children[0].children[0];
         mainTimerInterval = setInterval(() => millisecondsWhenStopped = beginTimer(timer, start), 1000 / 60);
         lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, start), 1000 / 60);
         startBtn.classList.add('hidden');
@@ -100,12 +91,10 @@ function startTime () {
 }
 
 function stopTime () {
-    const current = Date.now();
     clearInterval(mainTimerInterval);
     clearInterval(lapsInterval);
     millisecondsOffset = millisecondsWhenStopped;
     lapTimerMillisecondsOffset = lapTimerWhenStopped;
-    console.log(millisecondsWhenStopped);
     startBtn.classList.remove('hidden');
     stopBtn.classList.add('hidden');
     resetBtn.classList.remove('hidden');
@@ -117,7 +106,7 @@ function resetTime () {
     resetBtn.classList.add('hidden');
     lapBtn.classList.remove('hidden', 'lap');
     lapBtn.classList.add('lapoff')
-    timersList.innerHTML = "";
+    timersList.innerHTML = startingHtml;
     lapTimers.length = 0;
     timeNodes.length = 0;
 }
@@ -126,12 +115,23 @@ function recordLap () {
     const current = Date.now();
     clearInterval(lapsInterval);
     lapTimers.push(lapTimerWhenStopped);
-    const lapRow = createLapRow();
-    timeNodes.push(lapRow);
-    const currentLap = timeNodes[timeNodes.length - 1].children[1];
-    lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, current), 1000 / 60);
-    
-    console.log(lapTimers);
+
+
+    console.log('timers length', lapTimers.length);
+    console.log('timerlist length', timersList.rows.length);
+    if (lapTimers.length < timersList.rows.length) {
+        console.log('First time');
+        const currentLap = timersList.children[0].children[lapTimers.length - 1];
+        const nextLap = timersList.children[0].children[lapTimers.length];
+        timeNodes.push(currentLap);
+        lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(nextLap, current), 1000 / 60);
+    } else {
+        const lapRow = createLapRow();
+        const currentLap = timeNodes[timeNodes.length - 1].children[1];
+        console.log(currentLap);
+        timeNodes.push(currentLap);
+        lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(lapRow, current), 1000 / 60);
+    }
 
     if (lapTimers.length >= 3) {
         timeNodes.forEach((node) => node.className="")
@@ -144,6 +144,7 @@ function recordLap () {
         timeNodes[maxIndex].classList.add('worst');
         timeNodes[minIndex].classList.add('best');
     }
+    console.log(timeNodes);
 }
 
 startBtn.onclick = startTime;

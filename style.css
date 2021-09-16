@@ -22,12 +22,14 @@
   --stop-hold-bg-color: #1d0709;
   --background: #020003;
   --divisor-line: #211e21;
+  --scrollbar-color: #827f83;
 }
 
 body {
   color: white;
   font-family: "AppleFont";
   height: 100vh;
+  font-variant-numeric: tabular-nums;
 }
 
 .centered__container {
@@ -36,6 +38,7 @@ body {
   height: 812px;
   flex-direction: column;
   background-color: var(--background);
+  padding: 0 5px;
 }
 
 .container {
@@ -46,13 +49,14 @@ body {
 }
 
 .upper__screen {
-  height: 50%;
+  height: 60%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .timer__screen {
-  height: 75%;
+  height: 65%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -60,13 +64,26 @@ body {
 
 .timer__screen p {
   font-size: 72px;
-  font-variant-numeric: tabular-nums;
 }
 
 .timer__list {
   width: 95%;
   margin: auto;
   border-collapse: collapse;
+  overflow: auto;
+}
+
+.bottom__screen::-webkit-scrollbar {
+  width: 3px;
+  border-radius: 15px;
+}
+
+.bottom__screen::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color);
+}
+
+.bottom__screen::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 tr {
@@ -76,6 +93,7 @@ tr {
 tr td {
   width: 50%;
   padding: 0.5em;
+  height: 36px;
 }
 
 tr td:last-of-type {
@@ -84,9 +102,10 @@ tr td:last-of-type {
 
 .buttons {
   display: flex;
-  height: 25%;
+  height: 20%;
   justify-content: space-between;
-  padding: 0.5em;
+  align-items: center;
+  padding: 0 0.5em;
 }
 
 .roundBtn {
@@ -130,7 +149,8 @@ tr td:last-of-type {
 }
 
 .bottom__screen {
-  height: 50%;
+  height: 40%;
+  overflow: auto;
 }
 
 .hidden {
