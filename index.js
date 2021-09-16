@@ -1,3 +1,5 @@
+const { log:c } = console;
+
 const lapBtn = document.getElementById('lapBtn');
 const stopBtn = document.getElementById('stopBtn');
 const startBtn = document.getElementById('startBtn');
@@ -115,36 +117,31 @@ function recordLap () {
     const current = Date.now();
     clearInterval(lapsInterval);
     lapTimers.push(lapTimerWhenStopped);
-
-
-    console.log('timers length', lapTimers.length);
-    console.log('timerlist length', timersList.rows.length);
     if (lapTimers.length < timersList.rows.length) {
-        console.log('First time');
         const currentLap = timersList.children[0].children[lapTimers.length - 1];
         const nextLap = timersList.children[0].children[lapTimers.length];
         timeNodes.push(currentLap);
         lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(nextLap, current), 1000 / 60);
     } else {
         const lapRow = createLapRow();
-        const currentLap = timeNodes[timeNodes.length - 1].children[1];
-        console.log(currentLap);
+        const currentLap = timersList.children[0].children[lapTimers.length - 1];
+        c(timeNodes)
         timeNodes.push(currentLap);
         lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(lapRow, current), 1000 / 60);
     }
-
+    
     if (lapTimers.length >= 3) {
         timeNodes.forEach((node) => node.className="")
         const max = Math.max(...lapTimers);
         const min = Math.min (...lapTimers);
-
+        
         const maxIndex = lapTimers.indexOf(max)
         const minIndex = lapTimers.indexOf(min)
-
+        
         timeNodes[maxIndex].classList.add('worst');
         timeNodes[minIndex].classList.add('best');
     }
-    console.log(timeNodes);
+    c(timeNodes);
 }
 
 startBtn.onclick = startTime;
