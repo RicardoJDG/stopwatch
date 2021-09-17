@@ -1,5 +1,3 @@
-const { log:c } = console;
-
 const lapBtn = document.getElementById('lapBtn');
 const stopBtn = document.getElementById('stopBtn');
 const startBtn = document.getElementById('startBtn');
@@ -30,8 +28,13 @@ const formatTime = (timeInMilliseconds) => {
     const formattedMinutes = minutes < 60 ? minutes: minutes % 60;
     const hundredthSecond = timeInMilliseconds > 60 ? (timeInMilliseconds / 10) % 100 : timeInMilliseconds / 10;
     const flooredHundredthSecond = Math.floor(hundredthSecond)
+    const hours = minutes >= 60 ? Math.floor(minutes / 60) : 0;
 
-    return `${padTime(formattedMinutes)}:${padTime(formattedSeconds)}.${padTime(flooredHundredthSecond)}`
+    if (hours > 0) {
+        return `${padTime(hours)}:${padTime(formattedMinutes)}:${padTime(formattedSeconds)}.${padTime(flooredHundredthSecond)}`
+    } else {
+        return `${padTime(formattedMinutes)}:${padTime(formattedSeconds)}.${padTime(flooredHundredthSecond)}`
+    }
 }
 
 const createLapRow = () => {
@@ -56,8 +59,8 @@ const padTime = (time) => {
 }
 
 const beginTimer = (displayNode, startTime, millisecondsOffset = 0) => {
-    const current = Date.now();
-    const time = current - startTime;
+    const currentTime = Date.now();
+    const time = currentTime - startTime;
     const formattedTime = formatTime(time + millisecondsOffset)
 
     if (displayNode.id === 'timer') {
@@ -71,10 +74,22 @@ const beginTimer = (displayNode, startTime, millisecondsOffset = 0) => {
     return time + millisecondsOffset;
 }
 
-function startTime () {
-    const currentTime = timer.textContent;
+const colorBestAndWorst = (timeNodes) => {
+    timeNodes.forEach((node) => node.className="")
+    const max = Math.max(...lapTimers);
+    const min = Math.min (...lapTimers);
+    
+    const maxIndex = lapTimers.indexOf(max)
+    const minIndex = lapTimers.indexOf(min)
+    
+    timeNodes[maxIndex].classList.add('worst');
+    timeNodes[minIndex].classList.add('best');
+}
+
+const startTime = () => {
+    const currentDisplayedTime = timer.textContent;
     const start = Date.now();
-    if (currentTime !== '00:00.00') {
+    if (currentDisplayedTime !== '00:00.00') {
         const currentLap = timersList.children[0].children[lapTimers.length];
         mainTimerInterval = setInterval(() => millisecondsWhenStopped = beginTimer(timer, start, millisecondsOffset), 1000 / 60);
         lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(currentLap, start, lapTimerMillisecondsOffset), 1000 / 60);
@@ -92,7 +107,7 @@ function startTime () {
     }
 }
 
-function stopTime () {
+const stopTime = () => {
     clearInterval(mainTimerInterval);
     clearInterval(lapsInterval);
     millisecondsOffset = millisecondsWhenStopped;
@@ -103,7 +118,7 @@ function stopTime () {
     lapBtn.classList.add('hidden')
 }
 
-function resetTime () {
+const resetTime = () => {
     timer.textContent = '00:00.00';
     resetBtn.classList.add('hidden');
     lapBtn.classList.remove('hidden', 'lap');
@@ -113,10 +128,12 @@ function resetTime () {
     timeNodes.length = 0;
 }
 
-function recordLap () {
+const recordLap = () => {
     const current = Date.now();
     clearInterval(lapsInterval);
+
     lapTimers.push(lapTimerWhenStopped);
+
     if (lapTimers.length < timersList.rows.length) {
         const currentLap = timersList.children[0].children[lapTimers.length - 1];
         const nextLap = timersList.children[0].children[lapTimers.length];
@@ -125,26 +142,16 @@ function recordLap () {
     } else {
         const lapRow = createLapRow();
         const currentLap = timersList.children[0].children[lapTimers.length - 1];
-        c(timeNodes)
         timeNodes.push(currentLap);
         lapsInterval = setInterval(() => lapTimerWhenStopped = beginTimer(lapRow, current), 1000 / 60);
     }
     
-    if (lapTimers.length >= 3) {
-        timeNodes.forEach((node) => node.className="")
-        const max = Math.max(...lapTimers);
-        const min = Math.min (...lapTimers);
-        
-        const maxIndex = lapTimers.indexOf(max)
-        const minIndex = lapTimers.indexOf(min)
-        
-        timeNodes[maxIndex].classList.add('worst');
-        timeNodes[minIndex].classList.add('best');
+    if (lapTimers.length >= 2) {
+        colorBestAndWorst(timeNodes);
     }
-    c(timeNodes);
 }
 
-startBtn.onclick = startTime;
+startBtn.addEventListener('click', startTime);
 stopBtn.addEventListener('click', stopTime);
 lapBtn.addEventListener('click', recordLap);
 resetBtn.addEventListener('click', resetTime);
