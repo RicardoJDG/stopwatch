@@ -1,11 +1,12 @@
-const lapBtn = document.getElementById("lapBtn");
-const stopBtn = document.getElementById("stopBtn");
-const startBtn = document.getElementById("startBtn");
-const resetBtn = document.getElementById("resetBtn");
+const lapButton = document.getElementById("lapBtn");
+const stopButton = document.getElementById("stopBtn");
+const startButton = document.getElementById("startBtn");
+const resetButton = document.getElementById("resetBtn");
 const timer = document.getElementById("timer");
 const timersList = document.getElementById("timersList").children[0];
 const startingHtml = timersList.innerHTML;
 const initialTimerlistLength = timersList.rows.length;
+lapButton.disabled = true;
 
 let mainTimerInterval = null;
 let lapsInterval = null;
@@ -16,7 +17,9 @@ let millisecondsWhenStopped = 0;
 let newLapStart = 0;
 let lapTimer = 0;
 let lapTimerWhenStopped = 0;
-let lapTimerMillisecondsOffset = 0;
+let lapTimerStopTimeStamp = 0;
+
+let isRunning = false;
 
 const lapTimers = [];
 const timeNodes = [];
@@ -34,12 +37,18 @@ const formatTime = (timeInMilliseconds) => {
   const hours = minutes >= 60 ? Math.floor(minutes / 60) : 0;
 
   return hours > 0
-    ? `${padTime(hours)}:${padTime(formattedMinutes)}:${padTime(
-        formattedSeconds
-      )}.${padTime(flooredHundredthSecond)}`
-    : `${padTime(formattedMinutes)}:${padTime(formattedSeconds)}.${padTime(
-        flooredHundredthSecond
-      )}`;
+    ? padTime(hours) +
+        ":" +
+        padTime(formattedMinutes) +
+        ":" +
+        padTime(formattedSeconds) +
+        ":" +
+        padTime(flooredHundredthSecond)
+    : padTime(formattedMinutes) +
+        ":" +
+        padTime(formattedSeconds) +
+        ":" +
+        padTime(flooredHundredthSecond);
 };
 
 const createLapRow = () => {
@@ -57,6 +66,45 @@ const createLapRow = () => {
 
 const padTime = (time) => {
   return `${time.toString().padStart(2, "0")}`;
+};
+
+const hideButtons = (...args) => {
+  args.forEach((button) => button.classList.add("hidden"));
+};
+
+const showButtons = (...args) => {
+  args.forEach((button) => button.classList.remove("hidden"));
+};
+
+const activateLapButton = () => {
+  lapButton.classList.replace("lapoff", "lap");
+  lapButton.disabled = false;
+};
+
+const deactivateLapButton = () => {
+  lapButton.classList.replace("lap", "lapoff");
+  lapButton.classList.remove("hidden");
+  lapButton.disabled = true;
+};
+
+const stopTime = () => {
+  clearInterval(mainTimerInterval);
+  clearInterval(lapsInterval);
+  stopTimeStamp = millisecondsWhenStopped;
+  lapTimerStopTimeStamp = lapTimerWhenStopped;
+  hideButtons(stopButton, lapButton);
+  showButtons(startButton, resetButton);
+};
+
+const resetTime = () => {
+  timer.textContent = "00:00.00";
+  timersList.innerHTML = startingHtml;
+  lapTimers.length = 0;
+  timeNodes.length = 0;
+  isRunning = false;
+  hideButtons(resetButton);
+  showButtons(lapButton);
+  deactivateLapButton();
 };
 
 const beginTimer = (displayNode, startTime, stopTimeStamp = 0) => {
@@ -87,10 +135,10 @@ const colorBestAndWorst = () => {
 };
 
 const startTime = () => {
-  const currentDisplayedTime = timer.textContent;
   const start = Date.now();
-  if (currentDisplayedTime !== "00:00.00") {
-    const currentLap = timersList.firstElementChild;
+  const currentLap = timersList.firstElementChild;
+
+  if (isRunning) {
     mainTimerInterval = setInterval(
       () => (millisecondsWhenStopped = beginTimer(timer, start, stopTimeStamp)),
       1000 / 60
@@ -100,16 +148,13 @@ const startTime = () => {
         (lapTimerWhenStopped = beginTimer(
           currentLap,
           start,
-          lapTimerMillisecondsOffset
+          lapTimerStopTimeStamp
         )),
       1000 / 60
     );
-    startBtn.classList.add("hidden");
-    stopBtn.classList.remove("hidden");
-    resetBtn.classList.add("hidden");
-    lapBtn.classList.remove("hidden");
+    showButtons(stopButton, lapButton);
+    hideButtons(startButton, resetButton);
   } else {
-    const currentLap = timersList.firstElementChild;
     mainTimerInterval = setInterval(
       () => (millisecondsWhenStopped = beginTimer(timer, start)),
       1000 / 60
@@ -118,42 +163,25 @@ const startTime = () => {
       () => (lapTimerWhenStopped = beginTimer(currentLap, start)),
       1000 / 60
     );
-    startBtn.classList.add("hidden");
-    stopBtn.classList.remove("hidden");
-    lapBtn.classList.replace("lapoff", "lap");
+    isRunning = true;
+    hideButtons(startButton);
+    showButtons(stopButton);
+    activateLapButton();
   }
-};
-
-const stopTime = () => {
-  clearInterval(mainTimerInterval);
-  clearInterval(lapsInterval);
-  stopTimeStamp = millisecondsWhenStopped;
-  lapTimerMillisecondsOffset = lapTimerWhenStopped;
-  startBtn.classList.remove("hidden");
-  stopBtn.classList.add("hidden");
-  resetBtn.classList.remove("hidden");
-  lapBtn.classList.add("hidden");
-};
-
-const resetTime = () => {
-  timer.textContent = "00:00.00";
-  resetBtn.classList.add("hidden");
-  lapBtn.classList.remove("hidden", "lap");
-  lapBtn.classList.add("lapoff");
-  timersList.innerHTML = startingHtml;
-  lapTimers.length = 0;
-  timeNodes.length = 0;
 };
 
 const recordLap = () => {
   const current = Date.now();
+  const currentLap = timersList.firstElementChild;
+
   clearInterval(lapsInterval);
+
   lapTimers.unshift(lapTimerWhenStopped);
 
-  const currentLap = timersList.firstElementChild;
   const nextLap = createLapRow();
   timeNodes.unshift(currentLap);
 
+  //Move this to the creation lap row
   if (timeNodes.length < initialTimerlistLength) {
     timersList.removeChild(timersList.lastElementChild);
   }
@@ -163,12 +191,10 @@ const recordLap = () => {
     1000 / 60
   );
 
-  if (lapTimers.length >= 2) {
-    colorBestAndWorst();
-  }
+  if (lapTimers.length >= 2) colorBestAndWorst();
 };
 
-startBtn.addEventListener("click", startTime);
-stopBtn.addEventListener("click", stopTime);
-lapBtn.addEventListener("click", recordLap);
-resetBtn.addEventListener("click", resetTime);
+startButton.onclick = startTime;
+stopButton.onclick = stopTime;
+lapButton.onclick = recordLap;
+resetButton.onclick = resetTime;
